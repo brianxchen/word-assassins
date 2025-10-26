@@ -43,8 +43,13 @@
                     <div class="game-info">
                         <p>Your target is: <span id="target-name"></span></p>
                         <p>Your word is: <span id="target-word"></span></p>
-                        <button id="kill-btn" class="btn btn-danger">I killed them</button>
+                        <div class="game-buttons">
+                            <button id="kill-btn" class="btn btn-danger">I killed them</button>
+                            <br>
+                            <button id="pass-btn" class="btn btn-warning">Pass target</button>
+                        </div>
                         <p>Your score: <span id="score">0</span></p>
+                        <p>Passes left: <span id="passes-left">5</span></p>
                         <button id="logout-btn" class="btn btn-secondary">Logout</button>
                     </div>
                 </div>
@@ -78,7 +83,7 @@
                 </div>
                 
                 <div class="row mt-4">
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <h4>Remove Player</h4>
                         <div class="input-group">
                             <input type="text" id="remove-username" class="form-control" placeholder="Username to remove">
@@ -87,13 +92,22 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <h4>Add Points</h4>
                         <div class="input-group">
                             <input type="text" id="score-username" class="form-control" placeholder="Username">
                             <input type="number" id="score-points" class="form-control" placeholder="Points" value="1">
                             <div class="input-group-append">
                                 <button id="add-score-btn" class="btn btn-success">Add Points</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <h4>Reset Passes</h4>
+                        <div class="input-group">
+                            <input type="text" id="reset-passes-username" class="form-control" placeholder="Username">
+                            <div class="input-group-append">
+                                <button id="reset-passes-btn" class="btn btn-info">Reset Passes</button>
                             </div>
                         </div>
                     </div>

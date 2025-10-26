@@ -20,6 +20,10 @@ $(document).ready(function() {
         killTarget();
     });
 
+    $('#pass-btn').click(function() {
+        passTarget();
+    });
+
     $('#logout-btn').click(function() {
         logout();
     });
@@ -43,6 +47,13 @@ $(document).ready(function() {
         const points = parseInt($('#score-points').val()) || 1;
         if (username) {
             addScore(username, points);
+        }
+    });
+
+    $('#reset-passes-btn').click(function() {
+        const username = $('#reset-passes-username').val();
+        if (username) {
+            resetPasses(username);
         }
     });
 
@@ -163,6 +174,44 @@ $(document).ready(function() {
         });
     }
 
+    function passTarget() {
+        // Only allow passing if there's an actual target and passes left
+        const targetName = $('#target-name').text();
+        const targetWord = $('#target-word').text();
+        const passesLeft = parseInt($('#passes-left').text());
+        
+        if (targetName === 'Waiting for more players...' || targetWord === 'No word yet') {
+            alert('No target to pass!');
+            return;
+        }
+        
+        if (passesLeft <= 0) {
+            alert('No passes remaining!');
+            return;
+        }
+        
+        if (confirm(`Are you sure you want to pass on ${targetName} with word "${targetWord}"? You have ${passesLeft} passes left.`)) {
+            $.ajax({
+                url: '/pass',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({}),
+                success: function(data) {
+                    updateGameView(data);
+                    alert(`New target: ${data.target} with word "${data.word}". You have ${data.passes_left} passes left.`);
+                },
+                error: function(xhr) {
+                    const response = xhr.responseJSON;
+                    if (response && response.error) {
+                        alert(response.error);
+                    } else {
+                        alert('Pass failed. Please try again.');
+                    }
+                }
+            });
+        }
+    }
+
     function logout() {
         stopAutoRefresh();
         $.ajax({
@@ -247,6 +296,23 @@ $(document).ready(function() {
         });
     }
 
+    function resetPasses(username) {
+        $.ajax({
+            url: '/admin/reset-passes',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ username: username }),
+            success: function(data) {
+                alert(`Reset passes for ${username}!`);
+                $('#reset-passes-username').val('');
+                loadLeaderboard();
+            },
+            error: function() {
+                alert('Failed to reset passes.');
+            }
+        });
+    }
+
     function loadLeaderboard() {
         $.ajax({
             url: '/leaderboard',
@@ -285,8 +351,14 @@ $(document).ready(function() {
             html = '<ol class="list-group list-group-flush">';
             leaderboard.forEach(function(player, index) {
                 const badgeClass = index === 0 ? 'badge-warning' : index === 1 ? 'badge-secondary' : 'badge-light';
-                html += `<li class="list-group-item d-flex justify-content-between align-items-center">
-                    ${player.username}
+                const inactiveClass = player.active === false ? ' text-muted' : '';
+                const inactiveText = player.active === false ? ' (offline)' : '';
+                const passesText = player.passes_left !== undefined ? ` - ${player.passes_left} passes` : '';
+                html += `<li class="list-group-item d-flex justify-content-between align-items-center${inactiveClass}">
+                    <div>
+                        ${player.username}${inactiveText}
+                        <small class="text-muted">${passesText}</small>
+                    </div>
                     <span class="badge ${badgeClass}">${player.score}</span>
                 </li>`;
             });
@@ -306,7 +378,19 @@ $(document).ready(function() {
         } else {
             html = '<div class="kill-log-entries">';
             killLog.forEach(function(kill) {
-                const timeStr = new Date(kill.timestamp).toLocaleTimeString();
+                // Check if timestamp already includes PST/PDT, if not parse it as UTC and display as-is
+                let timeStr;
+                if (kill.timestamp.includes('PST') || kill.timestamp.includes('PDT')) {
+                    // Extract just the time part (HH:MM:SS) and timezone from the timestamp
+                    const parts = kill.timestamp.split(' ');
+                    const timePart = parts[1]; // Gets "HH:MM:SS" from "YYYY-MM-DD HH:MM:SS PST/PDT"
+                    const timezonePart = parts[2]; // Gets "PST" or "PDT"
+                    timeStr = timePart + ' ' + timezonePart;
+                } else {
+                    // Fallback for older timestamps without PST/PDT
+                    timeStr = new Date(kill.timestamp).toLocaleTimeString() + ' PST';
+                }
+                
                 html += `<div class="kill-entry">
                     <strong>${kill.killer}</strong> killed <strong>${kill.target}</strong>
                     <br><small class="text-muted">with "${kill.word}" at ${timeStr}</small>
@@ -325,6 +409,18 @@ $(document).ready(function() {
         $('#target-name').text(data.target);
         $('#target-word').text(data.word);
         $('#score').text(data.score);
+        $('#passes-left').text(data.passes_left || 0);
+        
+        // Enable/disable pass button based on passes left
+        const passesLeft = data.passes_left || 0;
+        const hasValidTarget = data.target !== 'Waiting for more players...' && data.word !== 'No word yet' && data.word !== 'You are the admin';
+        $('#pass-btn').prop('disabled', passesLeft <= 0 || !hasValidTarget);
+        
+        if (passesLeft <= 0) {
+            $('#pass-btn').text('No passes left');
+        } else {
+            $('#pass-btn').text(`Pass target (${passesLeft} left)`);
+        }
     }
 
     function startAutoRefresh() {

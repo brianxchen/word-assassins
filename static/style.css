@@ -140,6 +140,11 @@ h3, h4 {
     transform: translateY(-2px);
 }
 
+.game-buttons .btn {
+    margin: 5px 10px 5px 0;
+    min-width: 140px;
+}
+
 /* Cards and panels */
 #public-leaderboard, #game-leaderboard, #public-kill-log, #game-kill-log {
     background: rgba(55, 71, 79, 0.8);

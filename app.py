@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, render_template, session
 import random
 import os
 from datetime import datetime
+import pytz
 
 app = Flask(__name__, static_folder='static', template_folder='static')
 app.secret_key = os.environ.get('SECRET_KEY', 'your-secret-key-change-this-in-production')
@@ -44,10 +45,13 @@ def login():
         })
 
     if username not in game_state['players']:
-        game_state['players'][username] = {'score': 0, 'target': None, 'word': None, 'active': True}
+        game_state['players'][username] = {'score': 0, 'target': None, 'word': None, 'active': True, 'passes_left': 5}
     else:
         # Player is returning, mark them as active again
         game_state['players'][username]['active'] = True
+        # Ensure passes_left exists for returning players
+        if 'passes_left' not in game_state['players'][username]:
+            game_state['players'][username]['passes_left'] = 5
     
     assign_target(username)
     # When a player joins/rejoins, reassign targets for all active players
@@ -61,6 +65,7 @@ def login():
         'target': player_data.get('target') or 'Waiting for more players...',
         'word': player_data.get('word') or 'No word yet',
         'score': player_data.get('score', 0),
+        'passes_left': player_data.get('passes_left', 5),
         'username': username,
         'is_admin': False
     })
@@ -82,10 +87,14 @@ def get_session():
     
     if username and username in game_state['players'] and game_state['players'][username].get('active'):
         player_data = game_state['players'][username]
+        # Ensure passes_left exists for existing players
+        if 'passes_left' not in player_data:
+            player_data['passes_left'] = 5
         return jsonify({
             'target': player_data.get('target') or 'Waiting for more players...',
             'word': player_data.get('word') or 'No word yet',
             'score': player_data.get('score', 0),
+            'passes_left': player_data.get('passes_left', 5),
             'username': username,
             'is_admin': False
         })
@@ -103,12 +112,19 @@ def kill():
     if not player.get('active') or not player.get('target') or not player.get('word'):
         return jsonify({'error': 'No target available'}), 400
     
+    # Get current time in Pacific timezone (automatically handles PST/PDT)
+    pacific = pytz.timezone('America/Los_Angeles')
+    current_time = datetime.now(pacific)
+    
+    # Determine if we're in PST or PDT
+    timezone_name = "PST" if current_time.dst().total_seconds() == 0 else "PDT"
+    
     # Log the kill
     kill_entry = {
         'killer': username,
         'target': player['target'],
         'word': player['word'],
-        'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        'timestamp': current_time.strftime(f'%Y-%m-%d %H:%M:%S {timezone_name}')
     }
     
     # Add to kill log (keep only last 20 kills)
@@ -124,6 +140,39 @@ def kill():
         'target': player.get('target') or 'Waiting for more players...',
         'word': player.get('word') or 'No word yet',
         'score': player.get('score', 0),
+        'passes_left': player.get('passes_left', 5),
+        'username': username
+    })
+
+@app.route('/pass', methods=['POST'])
+def pass_target():
+    """Allow player to skip their current target and word (limited uses)"""
+    username = session.get('username')
+    if not username or username not in game_state['players'] or username == ADMIN_USERNAME:
+        return jsonify({'error': 'Invalid user or admin cannot pass'}), 400
+
+    player = game_state['players'][username]
+    
+    # Check if player is active and has passes left
+    if not player.get('active'):
+        return jsonify({'error': 'Player not active'}), 400
+    
+    if player.get('passes_left', 0) <= 0:
+        return jsonify({'error': 'No passes remaining'}), 400
+    
+    if not player.get('target') or not player.get('word'):
+        return jsonify({'error': 'No target to pass'}), 400
+    
+    # Use a pass and get a completely new target and word
+    player['passes_left'] -= 1
+    assign_target(username)
+
+    # Return the updated player data
+    return jsonify({
+        'target': player.get('target') or 'Waiting for more players...',
+        'word': player.get('word') or 'No word yet',
+        'score': player.get('score', 0),
+        'passes_left': player.get('passes_left', 0),
         'username': username
     })
 
@@ -145,10 +194,15 @@ def target():
         return jsonify({'error': 'Invalid user'}), 400
 
     player_data = game_state['players'][username]
+    # Ensure passes_left exists
+    if 'passes_left' not in player_data:
+        player_data['passes_left'] = 5
+    
     return jsonify({
         'target': player_data.get('target') or 'Waiting for more players...',
         'word': player_data.get('word') or 'No word yet',
         'score': player_data.get('score', 0),
+        'passes_left': player_data.get('passes_left', 5),
         'username': username,
         'is_admin': False
     })
@@ -163,7 +217,8 @@ def get_leaderboard():
             leaderboard.append({
                 'username': username,
                 'score': player_data.get('score', 0),
-                'active': player_data.get('active', False)
+                'active': player_data.get('active', False),
+                'passes_left': player_data.get('passes_left', 5)
             })
     
     # Sort by score descending
@@ -221,6 +276,23 @@ def admin_add_score():
     if username in game_state['players']:
         game_state['players'][username]['score'] += points
         return jsonify({'success': f'Added {points} points to {username}'})
+    
+    return jsonify({'error': 'Player not found'}), 404
+
+@app.route('/admin/reset-passes', methods=['POST'])
+def admin_reset_passes():
+    """Reset passes for a specific player"""
+    if not session.get('is_admin') or session.get('username') != ADMIN_USERNAME:
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    username = request.json.get('username')
+    
+    if not username:
+        return jsonify({'error': 'Username required'}), 400
+    
+    if username in game_state['players']:
+        game_state['players'][username]['passes_left'] = 5
+        return jsonify({'success': f'Reset passes for {username}'})
     
     return jsonify({'error': 'Player not found'}), 404
 
