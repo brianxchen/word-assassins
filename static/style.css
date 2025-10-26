@@ -1,56 +1,230 @@
+/* Dark Theme for Word Assassins */
 body {
-    font-family: sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     text-align: center;
+    background: linear-gradient(135deg, #0f0f23, #1a1a2e, #16213e);
+    color: #e0e6ed;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px 0;
 }
 
 .container {
-    max-width: 1000px;
-    margin: 50px auto;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
 }
 
+/* Main sections styling */
 #login-section, #game-section, #admin-section {
-    padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+    background: rgba(26, 26, 46, 0.9);
+    border: 1px solid #3e4a5c;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    margin-bottom: 20px;
 }
 
+/* Typography */
+h1 {
+    color: #64b5f6;
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 30px;
+}
+
+h2 {
+    color: #42a5f5;
+    font-size: 2rem;
+    margin-bottom: 25px;
+}
+
+h3, h4 {
+    color: #90a4ae;
+    margin-bottom: 15px;
+}
+
+/* Form inputs */
 #username {
-    margin-bottom: 10px;
+    background: rgba(55, 71, 79, 0.8);
+    border: 2px solid #455a64;
+    border-radius: 10px;
+    color: #e0e6ed;
+    padding: 15px;
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
 }
 
+#username:focus {
+    outline: none;
+    border-color: #64b5f6;
+    background: rgba(55, 71, 79, 1);
+}
+
+#username::placeholder {
+    color: #90a4ae;
+}
+
+/* Buttons */
+.btn {
+    border-radius: 10px;
+    padding: 12px 25px;
+    font-weight: 600;
+    font-size: 1rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn-primary {
+    background: linear-gradient(45deg, #42a5f5, #1e88e5);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(45deg, #1e88e5, #1565c0);
+    transform: translateY(-2px);
+}
+
+.btn-danger {
+    background: linear-gradient(45deg, #ef5350, #d32f2f);
+    color: white;
+}
+
+.btn-danger:hover {
+    background: linear-gradient(45deg, #d32f2f, #b71c1c);
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background: linear-gradient(45deg, #78909c, #546e7a);
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: linear-gradient(45deg, #546e7a, #37474f);
+    transform: translateY(-2px);
+}
+
+.btn-warning {
+    background: linear-gradient(45deg, #ffb74d, #ff9800);
+    color: white;
+}
+
+.btn-warning:hover {
+    background: linear-gradient(45deg, #ff9800, #f57c00);
+    transform: translateY(-2px);
+}
+
+.btn-info {
+    background: linear-gradient(45deg, #4fc3f7, #29b6f6);
+    color: white;
+}
+
+.btn-info:hover {
+    background: linear-gradient(45deg, #29b6f6, #0288d1);
+    transform: translateY(-2px);
+}
+
+.btn-success {
+    background: linear-gradient(45deg, #42a5f5, #1e88e5);
+    color: white;
+}
+
+.btn-success:hover {
+    background: linear-gradient(45deg, #1e88e5, #1565c0);
+    transform: translateY(-2px);
+}
+
+/* Cards and panels */
 #public-leaderboard, #game-leaderboard, #public-kill-log, #game-kill-log {
-    background-color: #f8f9fa;
-    padding: 15px;
-    border-radius: 5px;
+    background: rgba(55, 71, 79, 0.8);
+    border: 1px solid #4a5568;
+    border-radius: 12px;
+    padding: 20px;
     margin-top: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 #public-leaderboard h3, #game-leaderboard h4, #public-kill-log h3, #game-kill-log h4 {
     margin-bottom: 15px;
-    color: #495057;
+    color: #64b5f6;
+    border-bottom: 2px solid #4a5568;
+    padding-bottom: 10px;
 }
 
 .game-info {
-    background-color: #e9ecef;
-    padding: 20px;
-    border-radius: 5px;
+    background: rgba(66, 165, 245, 0.1);
+    border: 1px solid #42a5f5;
+    border-radius: 12px;
+    padding: 25px;
+}
+
+.game-info p {
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+}
+
+.game-info span {
+    color: #64b5f6;
+    font-weight: 600;
+}
+
+/* List styling */
+.list-group {
+    background: transparent;
 }
 
 .list-group-item {
+    background: rgba(55, 71, 79, 0.6);
+    border: 1px solid #4a5568;
+    color: #e0e6ed;
     text-align: left;
+    margin-bottom: 5px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.list-group-item:hover {
+    background: rgba(55, 71, 79, 0.8);
+    transform: translateX(5px);
+}
+
+.list-group-item:first-child {
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+.list-group-item:last-child {
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+/* Badges */
+.badge {
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.9rem;
 }
 
 .badge-warning {
-    background-color: #ffc107 !important;
+    background: linear-gradient(45deg, #ffd54f, #ffb300) !important;
+    color: #1a1a1a !important;
 }
 
 .badge-secondary {
-    background-color: #6c757d !important;
+    background: linear-gradient(45deg, #90a4ae, #607d8b) !important;
+    color: white !important;
 }
 
 .badge-light {
-    background-color: #f8f9fa !important;
-    color: #495057 !important;
+    background: linear-gradient(45deg, #78909c, #546e7a) !important;
+    color: white !important;
 }
 
 /* Kill Log Styles */
@@ -58,12 +232,38 @@ body {
     text-align: left;
     max-height: 300px;
     overflow-y: auto;
+    padding-right: 10px;
+}
+
+.kill-log-entries::-webkit-scrollbar {
+    width: 8px;
+}
+
+.kill-log-entries::-webkit-scrollbar-track {
+    background: rgba(55, 71, 79, 0.3);
+    border-radius: 4px;
+}
+
+.kill-log-entries::-webkit-scrollbar-thumb {
+    background: #64b5f6;
+    border-radius: 4px;
+}
+
+.kill-log-entries::-webkit-scrollbar-thumb:hover {
+    background: #42a5f5;
 }
 
 .kill-entry {
-    padding: 8px 0;
-    border-bottom: 1px solid #dee2e6;
-    font-size: 0.9em;
+    padding: 12px 0;
+    border-bottom: 1px solid #4a5568;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.kill-entry:hover {
+    background: rgba(66, 165, 245, 0.05);
+    border-radius: 6px;
+    padding-left: 8px;
 }
 
 .kill-entry:last-child {
@@ -71,38 +271,96 @@ body {
 }
 
 .kill-entry strong {
-    color: #495057;
+    color: #64b5f6;
+}
+
+.kill-entry small {
+    color: #90a4ae;
 }
 
 /* Admin Panel Styles */
 .admin-panel {
-    background-color: #fff3cd;
-    padding: 20px;
-    border-radius: 5px;
-    border: 2px solid #ffc107;
+    background: rgba(255, 183, 77, 0.1);
+    border: 2px solid #ffb74d;
+    border-radius: 15px;
+    padding: 25px;
 }
 
 .admin-controls {
-    margin-bottom: 20px;
+    margin-bottom: 25px;
 }
 
 .admin-controls button {
-    margin: 5px;
+    margin: 8px;
 }
 
 #admin-leaderboard, #admin-kill-log {
-    background-color: #f8f9fa;
-    padding: 15px;
-    border-radius: 5px;
+    background: rgba(55, 71, 79, 0.8);
+    border: 1px solid #4a5568;
+    border-radius: 12px;
+    padding: 20px;
     text-align: left;
 }
 
 #admin-section h2 {
-    color: #856404;
+    color: #ffb74d;
     margin-bottom: 20px;
 }
 
 #admin-section h4 {
-    color: #495057;
-    margin-bottom: 10px;
+    color: #90a4ae;
+    margin-bottom: 15px;
+}
+
+/* Input groups for admin */
+.input-group input {
+    background: rgba(55, 71, 79, 0.8);
+    border: 1px solid #4a5568;
+    color: #e0e6ed;
+    border-radius: 8px;
+}
+
+.input-group input:focus {
+    background: rgba(55, 71, 79, 1);
+    border-color: #64b5f6;
+    color: #e0e6ed;
+}
+
+.input-group input::placeholder {
+    color: #90a4ae;
+}
+
+.input-group-append .btn {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+/* Text colors */
+.text-muted {
+    color: #90a4ae !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .container {
+        max-width: 100%;
+        padding: 0 15px;
+    }
+    
+    h1 {
+        font-size: 2.5rem;
+    }
+    
+    .col-md-4, .col-md-6 {
+        margin-bottom: 20px;
+    }
+    
+    #login-section, #game-section, #admin-section {
+        padding: 20px;
+    }
+}
+
+/* Loading states */
+.text-muted {
+    font-style: italic;
 }
