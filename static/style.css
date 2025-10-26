@@ -1,11 +1,10 @@
-
 body {
     font-family: sans-serif;
     text-align: center;
 }
 
 .container {
-    max-width: 500px;
+    max-width: 800px;
     margin: 50px auto;
 }
 
@@ -17,4 +16,39 @@ body {
 
 #username {
     margin-bottom: 10px;
+}
+
+#public-leaderboard, #game-leaderboard {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    margin-top: 15px;
+}
+
+#public-leaderboard h3, #game-leaderboard h4 {
+    margin-bottom: 15px;
+    color: #495057;
+}
+
+.game-info {
+    background-color: #e9ecef;
+    padding: 20px;
+    border-radius: 5px;
+}
+
+.list-group-item {
+    text-align: left;
+}
+
+.badge-warning {
+    background-color: #ffc107 !important;
+}
+
+.badge-secondary {
+    background-color: #6c757d !important;
+}
+
+.badge-light {
+    background-color: #f8f9fa !important;
+    color: #495057 !important;
 }
