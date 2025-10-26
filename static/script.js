@@ -5,8 +5,9 @@ $(document).ready(function() {
     // Check for existing session on page load
     checkSession();
     
-    // Load leaderboard immediately
+    // Load leaderboard and kill log immediately
     loadLeaderboard();
+    loadKillLog();
 
     $('#login-btn').click(function() {
         const username = $('#username').val();
@@ -25,7 +26,7 @@ $(document).ready(function() {
 
     // Admin button handlers
     $('#reset-game-btn').click(function() {
-        if (confirm('Are you sure you want to reset the entire game? This will remove all players and scores.')) {
+        if (confirm('Are you sure you want to reset the entire game? This will remove all players, scores, and kill log.')) {
             resetGame();
         }
     });
@@ -47,6 +48,7 @@ $(document).ready(function() {
 
     $('#refresh-admin-btn').click(function() {
         loadLeaderboard();
+        loadKillLog();
     });
 
     $('#admin-logout-btn').click(function() {
@@ -147,8 +149,9 @@ $(document).ready(function() {
             data: JSON.stringify({}),
             success: function(data) {
                 updateGameView(data);
-                // Reload leaderboard after a kill
+                // Reload leaderboard and kill log after a kill
                 loadLeaderboard();
+                loadKillLog();
             },
             error: function(xhr) {
                 if (xhr.status === 400) {
@@ -173,8 +176,9 @@ $(document).ready(function() {
                 $('#admin-section').hide();
                 $('#username').val('');
                 isAdmin = false;
-                // Reload leaderboard after logout
+                // Reload leaderboard and kill log after logout
                 loadLeaderboard();
+                loadKillLog();
             },
             error: function() {
                 // Even if logout fails, show login screen
@@ -184,6 +188,7 @@ $(document).ready(function() {
                 $('#username').val('');
                 isAdmin = false;
                 loadLeaderboard();
+                loadKillLog();
             }
         });
     }
@@ -198,6 +203,7 @@ $(document).ready(function() {
             success: function(data) {
                 alert('Game reset successfully!');
                 loadLeaderboard();
+                loadKillLog();
             },
             error: function() {
                 alert('Failed to reset game.');
@@ -215,6 +221,7 @@ $(document).ready(function() {
                 alert(`Player ${username} removed successfully!`);
                 $('#remove-username').val('');
                 loadLeaderboard();
+                loadKillLog();
             },
             error: function() {
                 alert('Failed to remove player.');
@@ -255,6 +262,21 @@ $(document).ready(function() {
         });
     }
 
+    function loadKillLog() {
+        $.ajax({
+            url: '/kill-log',
+            type: 'GET',
+            success: function(data) {
+                displayKillLog(data);
+            },
+            error: function() {
+                $('#kill-log-list').html('<p class="text-muted">Failed to load kill log</p>');
+                $('#kill-log-list-game').html('<p class="text-muted">Failed to load kill log</p>');
+                $('#admin-kill-log').html('<p class="text-muted">Failed to load kill log</p>');
+            }
+        });
+    }
+
     function displayLeaderboard(leaderboard) {
         let html = '';
         if (leaderboard.length === 0) {
@@ -277,6 +299,28 @@ $(document).ready(function() {
         $('#admin-leaderboard').html(html);
     }
 
+    function displayKillLog(killLog) {
+        let html = '';
+        if (killLog.length === 0) {
+            html = '<p class="text-muted">No kills yet</p>';
+        } else {
+            html = '<div class="kill-log-entries">';
+            killLog.forEach(function(kill) {
+                const timeStr = new Date(kill.timestamp).toLocaleTimeString();
+                html += `<div class="kill-entry">
+                    <strong>${kill.killer}</strong> killed <strong>${kill.target}</strong>
+                    <br><small class="text-muted">with "${kill.word}" at ${timeStr}</small>
+                </div>`;
+            });
+            html += '</div>';
+        }
+        
+        // Update all kill log displays
+        $('#kill-log-list').html(html);
+        $('#kill-log-list-game').html(html);
+        $('#admin-kill-log').html(html);
+    }
+
     function updateGameView(data) {
         $('#target-name').text(data.target);
         $('#target-word').text(data.word);
@@ -284,7 +328,7 @@ $(document).ready(function() {
     }
 
     function startAutoRefresh() {
-        // Refresh every 3 seconds to check for new players and update leaderboard
+        // Refresh every 3 seconds to check for new players and update displays
         if (refreshInterval) {
             clearInterval(refreshInterval);
         }
@@ -293,6 +337,7 @@ $(document).ready(function() {
                 getNewTarget();
             }
             loadLeaderboard();
+            loadKillLog();
         }, 3000);
     }
 

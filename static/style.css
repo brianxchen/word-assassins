@@ -4,7 +4,7 @@ body {
 }
 
 .container {
-    max-width: 800px;
+    max-width: 1000px;
     margin: 50px auto;
 }
 
@@ -18,14 +18,14 @@ body {
     margin-bottom: 10px;
 }
 
-#public-leaderboard, #game-leaderboard {
+#public-leaderboard, #game-leaderboard, #public-kill-log, #game-kill-log {
     background-color: #f8f9fa;
     padding: 15px;
     border-radius: 5px;
     margin-top: 15px;
 }
 
-#public-leaderboard h3, #game-leaderboard h4 {
+#public-leaderboard h3, #game-leaderboard h4, #public-kill-log h3, #game-kill-log h4 {
     margin-bottom: 15px;
     color: #495057;
 }
@@ -53,6 +53,27 @@ body {
     color: #495057 !important;
 }
 
+/* Kill Log Styles */
+.kill-log-entries {
+    text-align: left;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.kill-entry {
+    padding: 8px 0;
+    border-bottom: 1px solid #dee2e6;
+    font-size: 0.9em;
+}
+
+.kill-entry:last-child {
+    border-bottom: none;
+}
+
+.kill-entry strong {
+    color: #495057;
+}
+
 /* Admin Panel Styles */
 .admin-panel {
     background-color: #fff3cd;
@@ -69,7 +90,7 @@ body {
     margin: 5px;
 }
 
-#admin-leaderboard {
+#admin-leaderboard, #admin-kill-log {
     background-color: #f8f9fa;
     padding: 15px;
     border-radius: 5px;

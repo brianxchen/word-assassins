@@ -14,11 +14,24 @@
             <input type="text" id="username" class="form-control" placeholder="Enter your name">
             <button id="login-btn" class="btn btn-primary">Login</button>
             
-            <!-- Leaderboard visible even when not logged in -->
-            <div id="public-leaderboard" class="mt-4">
-                <h3>Leaderboard</h3>
-                <div id="leaderboard-list">
-                    <p class="text-muted">Loading...</p>
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <!-- Leaderboard visible even when not logged in -->
+                    <div id="public-leaderboard">
+                        <h3>Leaderboard</h3>
+                        <div id="leaderboard-list">
+                            <p class="text-muted">Loading...</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <!-- Kill log visible even when not logged in -->
+                    <div id="public-kill-log">
+                        <h3>Recent Kills</h3>
+                        <div id="kill-log-list">
+                            <p class="text-muted">Loading...</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -26,7 +39,7 @@
         <div id="game-section" style="display: none;">
             <h2 id="welcome-message"></h2>
             <div class="row">
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <div class="game-info">
                         <p>Your target is: <span id="target-name"></span></p>
                         <p>Your word is: <span id="target-word"></span></p>
@@ -35,10 +48,18 @@
                         <button id="logout-btn" class="btn btn-secondary">Logout</button>
                     </div>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <div id="game-leaderboard">
                         <h4>Leaderboard</h4>
                         <div id="leaderboard-list-game">
+                            <p class="text-muted">Loading...</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div id="game-kill-log">
+                        <h4>Recent Kills</h4>
+                        <div id="kill-log-list-game">
                             <p class="text-muted">Loading...</p>
                         </div>
                     </div>
@@ -78,10 +99,18 @@
                     </div>
                 </div>
                 
-                <div class="mt-4">
-                    <h4>Current Players</h4>
-                    <div id="admin-leaderboard">
-                        <p class="text-muted">Loading...</p>
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <h4>Current Players</h4>
+                        <div id="admin-leaderboard">
+                            <p class="text-muted">Loading...</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h4>Kill Log</h4>
+                        <div id="admin-kill-log">
+                            <p class="text-muted">Loading...</p>
+                        </div>
                     </div>
                 </div>
             </div>

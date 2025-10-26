@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify, render_template, session
 import random
 import os
+from datetime import datetime
 
 app = Flask(__name__, static_folder='static', template_folder='static')
 app.secret_key = os.environ.get('SECRET_KEY', 'your-secret-key-change-this-in-production')
@@ -11,7 +12,8 @@ ADMIN_USERNAME = os.environ.get('ADMIN_USERNAME', 'admin-default')
 # In-memory data storage
 game_state = {
     'players': {},
-    'words': ['apple', 'banana', 'cherry', 'date', 'elderberry', 'fig', 'grape']
+    'words': ['apple', 'banana', 'cherry', 'date', 'elderberry', 'fig', 'grape'],
+    'kill_log': []  # New: store recent kills
 }
 
 @app.route('/')
@@ -91,8 +93,21 @@ def kill():
     player = game_state['players'][username]
     
     # Check if player has a valid target
-    if not player.get('target'):
+    if not player.get('target') or not player.get('word'):
         return jsonify({'error': 'No target available'}), 400
+    
+    # Log the kill
+    kill_entry = {
+        'killer': username,
+        'target': player['target'],
+        'word': player['word'],
+        'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    }
+    
+    # Add to kill log (keep only last 20 kills)
+    game_state['kill_log'].insert(0, kill_entry)
+    if len(game_state['kill_log']) > 20:
+        game_state['kill_log'] = game_state['kill_log'][:20]
     
     player['score'] += 1
     assign_target(username)
@@ -147,6 +162,11 @@ def get_leaderboard():
     leaderboard.sort(key=lambda x: x['score'], reverse=True)
     return jsonify(leaderboard)
 
+@app.route('/kill-log', methods=['GET'])
+def get_kill_log():
+    """Get the recent kill log"""
+    return jsonify(game_state['kill_log'])
+
 # Admin routes
 @app.route('/admin/reset', methods=['POST'])
 def admin_reset_game():
@@ -155,6 +175,7 @@ def admin_reset_game():
         return jsonify({'error': 'Unauthorized'}), 403
     
     game_state['players'] = {}
+    game_state['kill_log'] = []  # Also clear kill log
     return jsonify({'success': 'Game reset successfully'})
 
 @app.route('/admin/remove-player', methods=['POST'])
