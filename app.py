@@ -9,10 +9,13 @@ app.secret_key = os.environ.get('SECRET_KEY', 'your-secret-key-change-this-in-pr
 # Admin username from environment variable
 ADMIN_USERNAME = os.environ.get('ADMIN_USERNAME', 'admin-default')
 
+WORDS_STRING = os.environ.get('WORDS', 'apple,banana,cherry,date,elderberry,fig,grape')
+WORDS_LIST = [word.strip() for word in WORDS_STRING.split(',')]
+
 # In-memory data storage
 game_state = {
     'players': {},
-    'words': ['apple', 'banana', 'cherry', 'date', 'elderberry', 'fig', 'grape'],
+    'words': WORDS_LIST,
     'kill_log': []  # New: store recent kills
 }
 
@@ -41,12 +44,16 @@ def login():
         })
 
     if username not in game_state['players']:
-        game_state['players'][username] = {'score': 0, 'target': None, 'word': None}
-        assign_target(username)
-        # When a new player joins, reassign targets for all existing players
-        for player in game_state['players']:
-            if player != username:
-                assign_target(player)
+        game_state['players'][username] = {'score': 0, 'target': None, 'word': None, 'active': True}
+    else:
+        # Player is returning, mark them as active again
+        game_state['players'][username]['active'] = True
+    
+    assign_target(username)
+    # When a player joins/rejoins, reassign targets for all active players
+    for player in game_state['players']:
+        if player != username and game_state['players'][player].get('active'):
+            assign_target(player)
     
     # Ensure we always return the required fields
     player_data = game_state['players'][username]
@@ -73,7 +80,7 @@ def get_session():
             'is_admin': True
         })
     
-    if username and username in game_state['players']:
+    if username and username in game_state['players'] and game_state['players'][username].get('active'):
         player_data = game_state['players'][username]
         return jsonify({
             'target': player_data.get('target') or 'Waiting for more players...',
@@ -92,8 +99,8 @@ def kill():
 
     player = game_state['players'][username]
     
-    # Check if player has a valid target
-    if not player.get('target') or not player.get('word'):
+    # Check if player is active and has a valid target
+    if not player.get('active') or not player.get('target') or not player.get('word'):
         return jsonify({'error': 'No target available'}), 400
     
     # Log the kill
@@ -134,7 +141,7 @@ def target():
             'is_admin': True
         })
     
-    if not username or username not in game_state['players']:
+    if not username or username not in game_state['players'] or not game_state['players'][username].get('active'):
         return jsonify({'error': 'Invalid user'}), 400
 
     player_data = game_state['players'][username]
@@ -151,11 +158,12 @@ def get_leaderboard():
     """Get the leaderboard sorted by score"""
     leaderboard = []
     for username, player_data in game_state['players'].items():
-        # Don't include admin in leaderboard
+        # Don't include admin in leaderboard, but include all players (active and inactive)
         if username != ADMIN_USERNAME:
             leaderboard.append({
                 'username': username,
-                'score': player_data.get('score', 0)
+                'score': player_data.get('score', 0),
+                'active': player_data.get('active', False)
             })
     
     # Sort by score descending
@@ -190,9 +198,10 @@ def admin_remove_player():
     
     if player_to_remove in game_state['players']:
         del game_state['players'][player_to_remove]
-        # Reassign targets for remaining players
+        # Reassign targets for remaining active players
         for player in game_state['players']:
-            assign_target(player)
+            if game_state['players'][player].get('active'):
+                assign_target(player)
         return jsonify({'success': f'Player {player_to_remove} removed'})
     
     return jsonify({'error': 'Player not found'}), 404
@@ -219,17 +228,28 @@ def admin_add_score():
 def logout():
     username = session.get('username')
     if username and username in game_state['players'] and username != ADMIN_USERNAME:
-        del game_state['players'][username]
-        # Reassign targets for remaining players
+        # Mark player as inactive but don't remove them from the game
+        game_state['players'][username]['active'] = False
+        game_state['players'][username]['target'] = None
+        game_state['players'][username]['word'] = None
+        
+        # Reassign targets for remaining active players
         for player in game_state['players']:
-            assign_target(player)
+            if game_state['players'][player].get('active'):
+                assign_target(player)
+    
     session.clear()
     return jsonify({'success': True})
 
 def assign_target(username):
-    other_players = [p for p in game_state['players'] if p != username and p != ADMIN_USERNAME]
+    # Only assign targets from active players (excluding admin)
+    other_players = [p for p in game_state['players'] 
+                    if p != username 
+                    and p != ADMIN_USERNAME 
+                    and game_state['players'][p].get('active')]
+    
     if not other_players:
-        # Handle case where there are no other players - don't assign anything
+        # Handle case where there are no other active players
         game_state['players'][username]['target'] = None
         game_state['players'][username]['word'] = None
         return
