@@ -369,3 +369,83 @@ h3, h4 {
 .text-muted {
     font-style: italic;
 }
+
+/* Game Instructions Styling */
+#game-instructions {
+    background: rgba(55, 71, 79, 0.8);
+    border: 1px solid #4a5568;
+    border-radius: 12px;
+    padding: 25px;
+    margin: 20px 0;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+#game-instructions h3 {
+    color: #64b5f6;
+    margin-bottom: 20px;
+    text-align: center;
+    border-bottom: 2px solid #4a5568;
+    padding-bottom: 10px;
+}
+
+#game-instructions p {
+    color: #e0e6ed;
+    line-height: 1.6;
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+/* Instructions content layout */
+.instructions-content {
+    display: flex;
+    gap: 30px;
+    margin-top: 20px;
+}
+
+.instructions-content > div {
+    flex: 1;
+}
+
+.instructions-content h5 {
+    color: #90a4ae;
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    text-align: left;
+}
+
+.instructions-content ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    text-align: left;
+}
+
+.instructions-content li {
+    color: #e0e6ed;
+    margin-bottom: 10px;
+    padding-left: 20px;
+    position: relative;
+    line-height: 1.5;
+    text-align: left;
+}
+
+.instructions-content li:before {
+    content: "•";
+    color: #64b5f6;
+    font-weight: bold;
+    position: absolute;
+    left: 0;
+}
+
+/* Responsive design for instructions */
+@media (max-width: 768px) {
+    .instructions-content {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    #game-instructions {
+        padding: 20px;
+    }
+}

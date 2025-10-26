@@ -1,136 +1,209 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Word Assassins</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Word Assassins</title>
+  <link
+    rel="stylesheet"
+    href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+  />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
 </head>
+
 <body>
-    <div class="container">
-        <div id="login-section">
-            <h1>Word Assassins</h1>
-            <input type="text" id="username" class="form-control" placeholder="Enter your name">
-            <button id="login-btn" class="btn btn-primary">Login</button>
-            
-            <div class="row mt-4">
-                <div class="col-md-6">
-                    <!-- Leaderboard visible even when not logged in -->
-                    <div id="public-leaderboard">
-                        <h3>Leaderboard</h3>
-                        <div id="leaderboard-list">
-                            <p class="text-muted">Loading...</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <!-- Kill log visible even when not logged in -->
-                    <div id="public-kill-log">
-                        <h3>Recent Kills</h3>
-                        <div id="kill-log-list">
-                            <p class="text-muted">Loading...</p>
-                        </div>
-                    </div>
-                </div>
+  <div class="container">
+    <!-- Login Section -->
+    <div id="login-section">
+      <h1>Word Assassins</h1>
+      <input type="text" id="username" class="form-control" placeholder="Enter your name" />
+      <button id="login-btn" class="btn btn-primary">Login</button>
+
+      <!-- Game Instructions -->
+      <div class="row mt-4">
+        <div class="col-12">
+          <div id="game-instructions">
+            <h3>How to Play</h3>
+
+            <p>
+              Word Assassins is a social deception game where each player gets a secret target person and a target word.
+              You score points by making your target person say your target word in conversation. There are no eliminations —
+              when you score a point, you will get a new target person and target word. Watch the live leaderboard to
+              see who's in the lead!
+            </p>
+
+            <div class="instructions-content">
+              <!-- Word Rules -->
+              <div>
+                <h5>Word Rules</h5>
+                <ul>
+                  <li><strong>Homophones count</strong> (e.g., "two" = "to")</li>
+                  <li><strong>Plurals count</strong> (e.g., "shoe" = "shoes")</li>
+                  <li><strong>Accidents still count!</strong></li>
+                </ul>
+              </div>
+
+              <!-- Fair Play -->
+              <div>
+                <h5>Fair Play</h5>
+                <ul>
+                  <li>You can lie about your word and target</li>
+                  <li><strong>Never lie about eliminations</strong></li>
+                  <li>You can say your target's word</li>
+                  <li>Get help from other players too!</li>
+                </ul>
+              </div>
             </div>
+          </div>
         </div>
-        
-        <div id="game-section" style="display: none;">
-            <h2 id="welcome-message"></h2>
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="game-info">
-                        <p>Your target is: <span id="target-name"></span></p>
-                        <p>Your word is: <span id="target-word"></span></p>
-                        <div class="game-buttons">
-                            <button id="kill-btn" class="btn btn-danger">I killed them</button>
-                            <br>
-                            <button id="pass-btn" class="btn btn-warning">Pass target</button>
-                        </div>
-                        <p>Your score: <span id="score">0</span></p>
-                        <p>Passes left: <span id="passes-left">5</span></p>
-                        <button id="logout-btn" class="btn btn-secondary">Logout</button>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div id="game-leaderboard">
-                        <h4>Leaderboard</h4>
-                        <div id="leaderboard-list-game">
-                            <p class="text-muted">Loading...</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div id="game-kill-log">
-                        <h4>Recent Kills</h4>
-                        <div id="kill-log-list-game">
-                            <p class="text-muted">Loading...</p>
-                        </div>
-                    </div>
-                </div>
+      </div>
+
+      <!-- Public Leaderboard & Kill Log -->
+      <div class="row mt-4">
+        <div class="col-md-6">
+          <div id="public-leaderboard">
+            <h3>Leaderboard</h3>
+            <div id="leaderboard-list">
+              <p class="text-muted">Loading...</p>
             </div>
+          </div>
         </div>
-        
-        <!-- Admin Panel -->
-        <div id="admin-section" style="display: none;">
-            <h2>Admin Panel</h2>
-            <div class="admin-panel">
-                <div class="admin-controls">
-                    <button id="reset-game-btn" class="btn btn-warning">Reset Game</button>
-                    <button id="refresh-admin-btn" class="btn btn-info">Refresh</button>
-                    <button id="admin-logout-btn" class="btn btn-secondary">Logout</button>
-                </div>
-                
-                <div class="row mt-4">
-                    <div class="col-md-4">
-                        <h4>Remove Player</h4>
-                        <div class="input-group">
-                            <input type="text" id="remove-username" class="form-control" placeholder="Username to remove">
-                            <div class="input-group-append">
-                                <button id="remove-player-btn" class="btn btn-danger">Remove</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <h4>Add Points</h4>
-                        <div class="input-group">
-                            <input type="text" id="score-username" class="form-control" placeholder="Username">
-                            <input type="number" id="score-points" class="form-control" placeholder="Points" value="1">
-                            <div class="input-group-append">
-                                <button id="add-score-btn" class="btn btn-success">Add Points</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <h4>Reset Passes</h4>
-                        <div class="input-group">
-                            <input type="text" id="reset-passes-username" class="form-control" placeholder="Username">
-                            <div class="input-group-append">
-                                <button id="reset-passes-btn" class="btn btn-info">Reset Passes</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="row mt-4">
-                    <div class="col-md-6">
-                        <h4>Current Players</h4>
-                        <div id="admin-leaderboard">
-                            <p class="text-muted">Loading...</p>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <h4>Kill Log</h4>
-                        <div id="admin-kill-log">
-                            <p class="text-muted">Loading...</p>
-                        </div>
-                    </div>
-                </div>
+
+        <div class="col-md-6">
+          <div id="public-kill-log">
+            <h3>Recent Kills</h3>
+            <div id="kill-log-list">
+              <p class="text-muted">Loading...</p>
             </div>
+          </div>
         </div>
+      </div>
     </div>
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+    <!-- Game Section -->
+    <div id="game-section" style="display: none;">
+      <h2 id="welcome-message"></h2>
+      <div class="row">
+        <div class="col-md-4">
+          <div class="game-info">
+            <p>Your target is: <span id="target-name"></span></p>
+            <p>Your word is: <span id="target-word"></span></p>
+
+            <div class="game-buttons">
+              <button id="kill-btn" class="btn btn-danger">I killed them</button><br />
+              <button id="pass-btn" class="btn btn-warning">Pass target</button>
+            </div>
+
+            <p>Your score: <span id="score">0</span></p>
+            <p>Passes left: <span id="passes-left">5</span></p>
+            <button id="logout-btn" class="btn btn-secondary">Logout</button>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div id="game-leaderboard">
+            <h4>Leaderboard</h4>
+            <div id="leaderboard-list-game">
+              <p class="text-muted">Loading...</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div id="game-kill-log">
+            <h4>Recent Kills</h4>
+            <div id="kill-log-list-game">
+              <p class="text-muted">Loading...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Admin Panel -->
+    <div id="admin-section" style="display: none;">
+      <h2>Admin Panel</h2>
+      <div class="admin-panel">
+        <div class="admin-controls">
+          <button id="reset-game-btn" class="btn btn-warning">Reset Game</button>
+          <button id="refresh-admin-btn" class="btn btn-info">Refresh</button>
+          <button id="admin-logout-btn" class="btn btn-secondary">Logout</button>
+        </div>
+
+        <div class="row mt-4">
+          <div class="col-md-4">
+            <h4>Remove Player</h4>
+            <div class="input-group">
+              <input
+                type="text"
+                id="remove-username"
+                class="form-control"
+                placeholder="Username to remove"
+              />
+              <div class="input-group-append">
+                <button id="remove-player-btn" class="btn btn-danger">Remove</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <h4>Add Points</h4>
+            <div class="input-group">
+              <input
+                type="text"
+                id="score-username"
+                class="form-control"
+                placeholder="Username"
+              />
+              <input
+                type="number"
+                id="score-points"
+                class="form-control"
+                placeholder="Points"
+                value="1"
+              />
+              <div class="input-group-append">
+                <button id="add-score-btn" class="btn btn-success">Add Points</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <h4>Reset Passes</h4>
+            <div class="input-group">
+              <input
+                type="text"
+                id="reset-passes-username"
+                class="form-control"
+                placeholder="Username"
+              />
+              <div class="input-group-append">
+                <button id="reset-passes-btn" class="btn btn-info">Reset Passes</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row mt-4">
+          <div class="col-md-6">
+            <h4>Current Players</h4>
+            <div id="admin-leaderboard">
+              <p class="text-muted">Loading...</p>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <h4>Kill Log</h4>
+            <div id="admin-kill-log">
+              <p class="text-muted">Loading...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
