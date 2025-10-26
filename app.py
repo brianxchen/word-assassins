@@ -5,6 +5,9 @@ import os
 app = Flask(__name__, static_folder='static', template_folder='static')
 app.secret_key = os.environ.get('SECRET_KEY', 'your-secret-key-change-this-in-production')
 
+# Admin username from environment variable
+ADMIN_USERNAME = os.environ.get('ADMIN_USERNAME', 'admin-default')
+
 # In-memory data storage
 game_state = {
     'players': {},
@@ -24,6 +27,17 @@ def login():
     # Store username in session
     session['username'] = username
 
+    # Check if admin
+    if username == ADMIN_USERNAME:
+        session['is_admin'] = True
+        return jsonify({
+            'target': 'Admin Mode',
+            'word': 'You are the admin',
+            'score': 0,
+            'username': username,
+            'is_admin': True
+        })
+
     if username not in game_state['players']:
         game_state['players'][username] = {'score': 0, 'target': None, 'word': None}
         assign_target(username)
@@ -38,28 +52,41 @@ def login():
         'target': player_data.get('target') or 'Waiting for more players...',
         'word': player_data.get('word') or 'No word yet',
         'score': player_data.get('score', 0),
-        'username': username
+        'username': username,
+        'is_admin': False
     })
 
 @app.route('/session', methods=['GET'])
 def get_session():
     """Check if user has an active session"""
     username = session.get('username')
+    
+    # Handle admin session
+    if username == ADMIN_USERNAME and session.get('is_admin'):
+        return jsonify({
+            'target': 'Admin Mode',
+            'word': 'You are the admin',
+            'score': 0,
+            'username': username,
+            'is_admin': True
+        })
+    
     if username and username in game_state['players']:
         player_data = game_state['players'][username]
         return jsonify({
             'target': player_data.get('target') or 'Waiting for more players...',
             'word': player_data.get('word') or 'No word yet',
             'score': player_data.get('score', 0),
-            'username': username
+            'username': username,
+            'is_admin': False
         })
     return jsonify({'error': 'No active session'}), 401
 
 @app.route('/kill', methods=['POST'])
 def kill():
     username = session.get('username')
-    if not username or username not in game_state['players']:
-        return jsonify({'error': 'Invalid user'}), 400
+    if not username or username not in game_state['players'] or username == ADMIN_USERNAME:
+        return jsonify({'error': 'Invalid user or admin cannot kill'}), 400
 
     player = game_state['players'][username]
     
@@ -81,6 +108,17 @@ def kill():
 @app.route('/target', methods=['GET'])
 def target():
     username = session.get('username')
+    
+    # Handle admin
+    if username == ADMIN_USERNAME and session.get('is_admin'):
+        return jsonify({
+            'target': 'Admin Mode',
+            'word': 'You are the admin',
+            'score': 0,
+            'username': username,
+            'is_admin': True
+        })
+    
     if not username or username not in game_state['players']:
         return jsonify({'error': 'Invalid user'}), 400
 
@@ -89,7 +127,8 @@ def target():
         'target': player_data.get('target') or 'Waiting for more players...',
         'word': player_data.get('word') or 'No word yet',
         'score': player_data.get('score', 0),
-        'username': username
+        'username': username,
+        'is_admin': False
     })
 
 @app.route('/leaderboard', methods=['GET'])
@@ -97,19 +136,68 @@ def get_leaderboard():
     """Get the leaderboard sorted by score"""
     leaderboard = []
     for username, player_data in game_state['players'].items():
-        leaderboard.append({
-            'username': username,
-            'score': player_data.get('score', 0)
-        })
+        # Don't include admin in leaderboard
+        if username != ADMIN_USERNAME:
+            leaderboard.append({
+                'username': username,
+                'score': player_data.get('score', 0)
+            })
     
     # Sort by score descending
     leaderboard.sort(key=lambda x: x['score'], reverse=True)
     return jsonify(leaderboard)
 
+# Admin routes
+@app.route('/admin/reset', methods=['POST'])
+def admin_reset_game():
+    """Reset the entire game state"""
+    if not session.get('is_admin') or session.get('username') != ADMIN_USERNAME:
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    game_state['players'] = {}
+    return jsonify({'success': 'Game reset successfully'})
+
+@app.route('/admin/remove-player', methods=['POST'])
+def admin_remove_player():
+    """Remove a specific player"""
+    if not session.get('is_admin') or session.get('username') != ADMIN_USERNAME:
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    player_to_remove = request.json.get('username')
+    if not player_to_remove:
+        return jsonify({'error': 'Username required'}), 400
+    
+    if player_to_remove in game_state['players']:
+        del game_state['players'][player_to_remove]
+        # Reassign targets for remaining players
+        for player in game_state['players']:
+            assign_target(player)
+        return jsonify({'success': f'Player {player_to_remove} removed'})
+    
+    return jsonify({'error': 'Player not found'}), 404
+
+@app.route('/admin/add-score', methods=['POST'])
+def admin_add_score():
+    """Add points to a player's score"""
+    if not session.get('is_admin') or session.get('username') != ADMIN_USERNAME:
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    username = request.json.get('username')
+    points = request.json.get('points', 1)
+    
+    if not username:
+        return jsonify({'error': 'Username required'}), 400
+    
+    if username in game_state['players']:
+        game_state['players'][username]['score'] += points
+        return jsonify({'success': f'Added {points} points to {username}'})
+    
+    return jsonify({'error': 'Player not found'}), 404
+
 @app.route('/logout', methods=['POST'])
 def logout():
     username = session.get('username')
-    if username and username in game_state['players']:
+    if username and username in game_state['players'] and username != ADMIN_USERNAME:
         del game_state['players'][username]
         # Reassign targets for remaining players
         for player in game_state['players']:
@@ -118,7 +206,7 @@ def logout():
     return jsonify({'success': True})
 
 def assign_target(username):
-    other_players = [p for p in game_state['players'] if p != username]
+    other_players = [p for p in game_state['players'] if p != username and p != ADMIN_USERNAME]
     if not other_players:
         # Handle case where there are no other players - don't assign anything
         game_state['players'][username]['target'] = None

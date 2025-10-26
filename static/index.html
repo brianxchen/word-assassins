@@ -45,6 +45,47 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Admin Panel -->
+        <div id="admin-section" style="display: none;">
+            <h2>Admin Panel</h2>
+            <div class="admin-panel">
+                <div class="admin-controls">
+                    <button id="reset-game-btn" class="btn btn-warning">Reset Game</button>
+                    <button id="refresh-admin-btn" class="btn btn-info">Refresh</button>
+                    <button id="admin-logout-btn" class="btn btn-secondary">Logout</button>
+                </div>
+                
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <h4>Remove Player</h4>
+                        <div class="input-group">
+                            <input type="text" id="remove-username" class="form-control" placeholder="Username to remove">
+                            <div class="input-group-append">
+                                <button id="remove-player-btn" class="btn btn-danger">Remove</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h4>Add Points</h4>
+                        <div class="input-group">
+                            <input type="text" id="score-username" class="form-control" placeholder="Username">
+                            <input type="number" id="score-points" class="form-control" placeholder="Points" value="1">
+                            <div class="input-group-append">
+                                <button id="add-score-btn" class="btn btn-success">Add Points</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <h4>Current Players</h4>
+                    <div id="admin-leaderboard">
+                        <p class="text-muted">Loading...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="{{ url_for('static', filename='script.js') }}"></script>

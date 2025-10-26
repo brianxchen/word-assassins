@@ -8,7 +8,7 @@ body {
     margin: 50px auto;
 }
 
-#login-section, #game-section {
+#login-section, #game-section, #admin-section {
     padding: 20px;
     border: 1px solid #ccc;
     border-radius: 5px;
@@ -51,4 +51,37 @@ body {
 .badge-light {
     background-color: #f8f9fa !important;
     color: #495057 !important;
+}
+
+/* Admin Panel Styles */
+.admin-panel {
+    background-color: #fff3cd;
+    padding: 20px;
+    border-radius: 5px;
+    border: 2px solid #ffc107;
+}
+
+.admin-controls {
+    margin-bottom: 20px;
+}
+
+.admin-controls button {
+    margin: 5px;
+}
+
+#admin-leaderboard {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    text-align: left;
+}
+
+#admin-section h2 {
+    color: #856404;
+    margin-bottom: 20px;
+}
+
+#admin-section h4 {
+    color: #495057;
+    margin-bottom: 10px;
 }
