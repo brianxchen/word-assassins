@@ -3,6 +3,10 @@ import random
 import os
 from datetime import datetime
 import pytz
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 app = Flask(__name__, static_folder='static', template_folder='static')
 app.secret_key = os.environ.get('SECRET_KEY', 'your-secret-key-change-this-in-production')
